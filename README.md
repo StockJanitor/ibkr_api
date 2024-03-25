@@ -1,4 +1,6 @@
 # ibkr_api
+Note: this requires ibapi module
+
 ibkr api is clunky, therefore making a dummie, readable, open source ibkr api codes
 
 solely rely on ibapi for following utilities:
