@@ -1,0 +1,5 @@
+Documentation Link
+https://www.interactivebrokers.com/en/trading/ib-api.php
+
+Avaliable Tick Type Link
+https://interactivebrokers.github.io/tws-api/tick_types.html
