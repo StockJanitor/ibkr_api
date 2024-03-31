@@ -7,6 +7,13 @@ from ibapi.contract import Contract
 
 class ib_client:
     def __init__(self,clientId = 1,port=7497,host="127.0.0.1") -> None:
+        """
+        3 secions:
+        1. mkt data section
+        2. fundmental data section
+        3. account section
+        """
+        
         self.ib = ib_io()
         self.ib.connect(host,port,clientId)
 
@@ -27,6 +34,11 @@ class ib_client:
     # function - creating security
     # data_detail = {"sec_type": "STK", "currency": "USD", "exchange" : "ISLAND"}
     def security(self,symbol, data_detail):
+        """
+        Input: symbol, contract detail
+        Output: contract
+
+        """
         # note volume is in thousands
         contract = Contract()
         contract.symbol = symbol
@@ -35,6 +47,7 @@ class ib_client:
         contract.exchange = data_detail["exchange"]
         return contract
     
+    # function - obtain stock historical data
     def stock_historical_data(self, symbol, duration = "1 M", candle_size="1 day"):
         '''
         Input: symbol, duration, candel size
@@ -65,6 +78,8 @@ class ib_client:
         time.sleep(1)
         self.ib.req_id+=1
         return self.ib.stock_data_dict
+    
+    # obtain option chain
     def option_chain(self, symbol):
         pass
 
@@ -76,3 +91,4 @@ print(item.stock_historical_data("AAPL"))
 
 # close loop
 item.close_loop()
+

@@ -3,3 +3,7 @@ https://www.interactivebrokers.com/en/trading/ib-api.php
 
 Avaliable Tick Type Link
 https://interactivebrokers.github.io/tws-api/tick_types.html
+
+
+New Link
+https://ibkrcampus.com/ibkr-api-page/twsapi-doc/#contracts
