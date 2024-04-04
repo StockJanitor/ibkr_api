@@ -1,6 +1,8 @@
 from ib_io import ib_io
 from threading import Thread
 import time
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 from ibapi.contract import Contract
 
@@ -12,6 +14,7 @@ class ib_client:
         1. mkt data section
         2. fundmental data section
         3. account section
+        4. parsing section
         """
         
         self.ib = ib_io()
@@ -44,7 +47,7 @@ class ib_client:
         for key, value in data.items():
             self.contract_data[key] = value
 
-
+############### 1. Market Data Section ###############
     # function - creating security(contract)
     # data_detail = {"sec_type": "STK", "currency": "USD", "exchange" : "ISLAND"}
     def security(self,symbol, data_detail=""):
@@ -58,7 +61,6 @@ class ib_client:
         if data_detail:
         # update contract details
             self.process_data(data_detail)
-
 
         # note volume is in thousands
         contract = Contract()
@@ -75,18 +77,12 @@ class ib_client:
                 contract.lastTradeDateOrContractMonth = self.contract_data["exp_date"]
             contract.multiplier=100
             
-
-
         return contract
     
     def req_contract_details(self,security):
         '''
-        
         input: contract
-
-        output: idk
-
-        
+        output: currently conId
         '''
         # security = self.security(symbol)
         self.ib.reqContractDetails(self.ib.req_id, security)
@@ -137,9 +133,7 @@ class ib_client:
         )
 
         # give 1 second to load data
-        time.sleep(3)
-
-
+        time.sleep(2)
 
         # increment request id
         self.ib.req_id+=1
@@ -168,9 +162,20 @@ class ib_client:
         )
         time.sleep(1)
 
-
         # increment request id
         self.ib.req_id+=1
         return self.ib.option_chain
 
 
+############### 4. Parsing Section ###############
+    def filter_option_chain(self,symbol,mth="5"):
+        filtered_chain = self.ib.option_chain.copy()
+        current_date = datetime.today() 
+        future_date = current_date + relativedelta(months=3)
+        current_date = current_date.strftime("%Y%m")
+        future_date = future_date.strftime("%Y%m")
+        price = 150.00
+        lower_strike, upper_strike = price*.9,price*1.025
+        filtered_chain["AAPL"]["expirations"] = [_ for _ in filtered_chain["AAPL"]["expirations"] if current_date <= _ <= future_date]
+        filtered_chain["AAPL"]["strikes"]= [_ for _ in filtered_chain["AAPL"]["strikes"] if lower_strike <= _ <= upper_strike]
+        return filtered_chain
