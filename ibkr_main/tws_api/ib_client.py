@@ -53,6 +53,7 @@ class ib_client:
     def security(self,symbol, data_detail=""):
         """
         Input: symbol, contract detail
+            data_detail = {"sec_type": "STK", "currency": "USD", "exchange" : "ISLAND"}
             data_detail - sec_type, currency, exchange, contract_type,strike,exp_date
 
         Output: contract
@@ -95,7 +96,7 @@ class ib_client:
     def req_stock_historical_data(self, symbol, data_detail=""):
         '''
         Input: symbol, duration, candel size
-        stock_historical_data("aapl","1 M","1 day")
+        data_details = {"duration" : "1 M", "candle_size" : "1 day"... security details}
         https://interactivebrokers.github.io/tws-api/historical_bars.html
         
         Output: stock dict
@@ -114,7 +115,7 @@ class ib_client:
         # print("data: {} \n\n".format(self.contract_data))
 
         contract = self.security(symbol,data_detail = self.contract_data)
-        
+
         self.ib.reqHistoricalData(
             reqId=self.ib.req_id,
             contract=contract,
@@ -141,6 +142,9 @@ class ib_client:
     
     # obtain option chain
     def req_option_chain(self, symbol, data_detail=""):
+        '''
+        input: symbol, data_detail
+        '''
         
         # process data_details if inserted
         if data_detail:
@@ -157,8 +161,6 @@ class ib_client:
             futFopExchange="",
             underlyingSecType=contract.secType,
             underlyingConId=self.ib.contract_details[symbol],
-            # 265598
-
         )
         time.sleep(1)
 
@@ -166,16 +168,56 @@ class ib_client:
         self.ib.req_id+=1
         return self.ib.option_chain
 
+    def option_details(self,symbol,contract_type="P"):
+        for i in self.ib.filtered_option_chain[symbol]["expirations"]:
+            for j in self.ib.filtered_option_chain[symbol]["strikes"]:
+
+                option_detail = {
+                    "sec_type":"OPT",
+                    "exchange":"BOX",
+                    "contract_type":contract_type,
+                    "strike":j,
+                    "exp_date":i,
+                    }
+                
+                # create contract
+                contract = self.security(symbol,option_detail)
+                # request contract details
+                self.req_contract_details(contract)
+
+                print(f"{i} : {j}")
+
+                self.ib.req_id+=1
+
 
 ############### 4. Parsing Section ###############
-    def filter_option_chain(self,symbol,mth="5"):
-        filtered_chain = self.ib.option_chain.copy()
+    def filter_option_chain(self,symbol,input_detail=""):
+        price = 150.00
+
+        # default data
+        data_detail = {"month" : 3, "lower" :price*.9,"upper":price*1.025}
+
+        # updating data
+        if input_detail:
+            for i in input_detail:
+                data_detail[i] = input_detail[i]
+
+        self.ib.filtered_option_chain = self.ib.option_chain.copy()
         current_date = datetime.today() 
-        future_date = current_date + relativedelta(months=3)
+        future_date = current_date + relativedelta(months=data_detail["month"])
         current_date = current_date.strftime("%Y%m")
         future_date = future_date.strftime("%Y%m")
-        price = 150.00
-        lower_strike, upper_strike = price*.9,price*1.025
-        filtered_chain["AAPL"]["expirations"] = [_ for _ in filtered_chain["AAPL"]["expirations"] if current_date <= _ <= future_date]
-        filtered_chain["AAPL"]["strikes"]= [_ for _ in filtered_chain["AAPL"]["strikes"] if lower_strike <= _ <= upper_strike]
-        return filtered_chain
+
+        self.ib.filtered_option_chain[symbol]["expirations"] = [_ for _ in self.ib.filtered_option_chain["AAPL"]["expirations"] if current_date <= _ <= future_date]
+        self.ib.filtered_option_chain[symbol]["strikes"]= [_ for _ in self.ib.filtered_option_chain["AAPL"]["strikes"] if data_detail["lower"] <= _ <= data_detail["upper"]]
+        return self.ib.filtered_option_chain
+
+
+
+
+
+
+
+
+
+

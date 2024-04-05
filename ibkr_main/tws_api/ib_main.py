@@ -11,13 +11,24 @@ ite1 = {
     #"exp_date" : "date"
     
     }
-
+tickers = "AAPL"
 ############### Program Codes ###############
 # initialize client object
 item = ib_client()
 
-# item.contract_details("AAPL")
-print(item.req_option_chain("AAPL"))
+# request historical price
+item.req_stock_historical_data(tickers)
+print(item.ib.stock_data_dict)
+
+# obtain full option chain
+item.req_option_chain(tickers)
+
+# filter option chain
+item.filter_option_chain(tickers)
+
+# obtain option data
+item.option_details(tickers)
+
 
 # close loop
 item.close_loop()

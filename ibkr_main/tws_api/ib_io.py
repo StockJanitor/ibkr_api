@@ -10,7 +10,6 @@ class ib_io(EWrapper, EClient):
         EClient.__init__(self,self)
         self.req_id = 0
 
-
         self.contract_details = {}
 
         # stock price data, stock option data, fundamental data
@@ -18,7 +17,9 @@ class ib_io(EWrapper, EClient):
 
         # option chain
         self.option_chain = {}
+        self.filtered_option_chain= {}
 
+        self.option_details = {}
         # data = {"aapl": {"item1": {"bid": 2, "ask": 1}, "item2": {"bid": 3, "ask": 1}},
         #          "amz": {"item3": {"bid": 7, "ask": 1}, "item5": {"bid": 8, "ask": 1}},}
         #        
@@ -46,14 +47,18 @@ df = pd.DataFrame(dict_list)
     # output error
     def error(self,reqId,errorCode,errorString,test=""):
         print("Error {} {} {}".format(reqId,errorCode,errorString))
+        # time.sleep(7)
+        # self.disconnect()
 
 
 
     def contractDetails(self, reqId, contractDetails):
         contract_id = contractDetails.contract.conId
         symbol = contractDetails.contract.symbol
-
         self.contract_details[symbol]= contract_id
+
+        self.contract_details[reqId] = contractDetails.contract
+        self.reqMktData(reqId, contractDetails.contract, "", False, False, [])
 
     
     def contractDetailsEnd(self, reqId):
