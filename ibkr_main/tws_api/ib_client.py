@@ -16,7 +16,7 @@ class ib_client:
         3. account section
         4. parsing section
         """
-        
+
         self.ib = ib_io()
         self.ib.connect(host,port,clientId)
 
@@ -83,12 +83,12 @@ class ib_client:
     def req_contract_details(self,security):
         '''
         input: contract
-        output: currently conId
+        output: currently conId, contract details
         '''
         # security = self.security(symbol)
         self.ib.reqContractDetails(self.ib.req_id, security)
         self.ib.req_id+=1
-        time.sleep(1)
+        time.sleep(2) # this is crucial to wait for data to come
         return self.ib.contract_details
 
 
@@ -114,7 +114,11 @@ class ib_client:
 
         # print("data: {} \n\n".format(self.contract_data))
 
+        # create contract
         contract = self.security(symbol,data_detail = self.contract_data)
+
+        self.ib.stock_data_dict[self.ib.req_id] = {"ticker" : symbol}
+
 
         self.ib.reqHistoricalData(
             reqId=self.ib.req_id,
@@ -134,7 +138,7 @@ class ib_client:
         )
 
         # give 1 second to load data
-        time.sleep(2)
+        time.sleep(10)
 
         # increment request id
         self.ib.req_id+=1
@@ -154,7 +158,9 @@ class ib_client:
         contract = self.security(symbol, self.contract_data)    
         # req contract details
         self.req_contract_details(contract)
+        
 
+        # returns option chain: expirations, strikes etc
         self.ib.reqSecDefOptParams(
             reqId=self.ib.req_id,
             underlyingSymbol=symbol,
@@ -162,13 +168,19 @@ class ib_client:
             underlyingSecType=contract.secType,
             underlyingConId=self.ib.contract_details[symbol],
         )
-        time.sleep(1)
+        time.sleep(3)
 
         # increment request id
         self.ib.req_id+=1
         return self.ib.option_chain
 
     def option_details(self,symbol,contract_type="P"):
+        '''
+        
+        
+        tick types:
+        https://interactivebrokers.github.io/tws-api/tick_types.html
+        '''
         for i in self.ib.filtered_option_chain[symbol]["expirations"]:
             for j in self.ib.filtered_option_chain[symbol]["strikes"]:
 
@@ -180,22 +192,37 @@ class ib_client:
                     "exp_date":i,
                     }
                 
+                print(f"current expiration {i} : current strike {j}")
+
                 # create contract
                 contract = self.security(symbol,option_detail)
                 # request contract details
                 self.req_contract_details(contract)
+                time.sleep(3)
 
-                print(f"{i} : {j}")
+
+                
 
                 self.ib.req_id+=1
+
+############### 2. Fundamental Data Section ###############
+
+
+
+
+
+
+
 
 
 ############### 4. Parsing Section ###############
     def filter_option_chain(self,symbol,input_detail=""):
-        price = 150.00
+        price = 165.00
+        lower_multiplier = 0.975 # 0.9 is nice
+        upper_multiplier = 1.025
 
         # default data
-        data_detail = {"month" : 3, "lower" :price*.9,"upper":price*1.025}
+        data_detail = {"month" : 1, "lower" :price*lower_multiplier,"upper":price*1.025}
 
         # updating data
         if input_detail:
@@ -208,12 +235,22 @@ class ib_client:
         current_date = current_date.strftime("%Y%m")
         future_date = future_date.strftime("%Y%m")
 
-        self.ib.filtered_option_chain[symbol]["expirations"] = [_ for _ in self.ib.filtered_option_chain["AAPL"]["expirations"] if current_date <= _ <= future_date]
-        self.ib.filtered_option_chain[symbol]["strikes"]= [_ for _ in self.ib.filtered_option_chain["AAPL"]["strikes"] if data_detail["lower"] <= _ <= data_detail["upper"]]
+        self.ib.filtered_option_chain[symbol]["expirations"] = [_ for _ in self.ib.filtered_option_chain[symbol]["expirations"] if current_date <= _ <= future_date]
+        self.ib.filtered_option_chain[symbol]["strikes"]= [_ for _ in self.ib.filtered_option_chain[symbol]["strikes"] if data_detail["lower"] <= _ <= data_detail["upper"]]
         return self.ib.filtered_option_chain
 
 
+    def toJson(self, item:dict):
+        import json
+        import os
+        # Get current working directory
+        current_directory = os.path.dirname(os.path.abspath(__file__))
 
+        for _ in item:
+            for v in item[_]["stock_data"]:
+                v["volume"] = float(v['volume'])
+            with open(f"{current_directory}/data/{item[_]["ticker"]}.json", "w") as outfile: 
+                json.dump(item, outfile,indent=4)
 
 
 

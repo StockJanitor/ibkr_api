@@ -1,4 +1,6 @@
 from ib_client import ib_client
+import time
+
 
 ############### Inputs ###############
 ite1 = {
@@ -11,27 +13,48 @@ ite1 = {
     #"exp_date" : "date"
     
     }
-tickers = "AAPL"
+tickers = "ROOT"
 ############### Program Codes ###############
 # initialize client object
 item = ib_client()
 
+
+##### STOCKS #####
+
 # request historical price
-item.req_stock_historical_data(tickers)
-print(item.ib.stock_data_dict)
+# Example: data_details = {"duration" : "1 M", "candle_size" : "1 day"... security details}
+data = {"duration": "5 Y"}
+item.req_stock_historical_data(tickers, data_detail=data)
 
-# obtain full option chain
-item.req_option_chain(tickers)
-
-# filter option chain
-item.filter_option_chain(tickers)
-
-# obtain option data
-item.option_details(tickers)
+# print(item.ib.stock_data_dict)
+# item.toJson(item.ib.stock_data_dict)
 
 
+
+##### OPTIONS #####
+
+# # obtain full option chain
+# item.req_option_chain(tickers)
+# time.sleep(2)
+
+# print(1)
+# # filter option chain
+# print(item.filter_option_chain(tickers))
+# print(2)
+
+
+# # # obtain option data
+# item.option_details(tickers)
+
+##### CLOSE #####
 # close loop
 item.close_loop()
+
+# time.sleep(10)
+# print(item.ib.contract_details)
+
+
+
 
 
 
