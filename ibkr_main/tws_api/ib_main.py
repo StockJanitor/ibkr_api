@@ -13,7 +13,7 @@ ite1 = {
     #"exp_date" : "date"
     
     }
-tickers = "ROOT"
+tickers = "AAPL"
 ############### Program Codes ###############
 # initialize client object
 item = ib_client()
@@ -23,11 +23,18 @@ item = ib_client()
 
 # request historical price
 # Example: data_details = {"duration" : "1 M", "candle_size" : "1 day"... security details}
-data = {"duration": "5 Y"}
+data = {"duration": "5 D"}
 item.req_stock_historical_data(tickers, data_detail=data)
 
-# print(item.ib.stock_data_dict)
+print(item.ib.stock_data_dict)
 # item.toJson(item.ib.stock_data_dict)
+
+
+
+# request fundamental data
+# item.req_fundamental_data(tickers)
+
+
 
 
 
@@ -47,15 +54,12 @@ item.req_stock_historical_data(tickers, data_detail=data)
 # item.option_details(tickers)
 
 ##### CLOSE #####
-# close loop
-item.close_loop()
-
 # time.sleep(10)
 # print(item.ib.contract_details)
 
 
-
-
+# close loop
+item.close_loop()
 
 
 

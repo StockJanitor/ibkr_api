@@ -206,9 +206,22 @@ class ib_client:
                 self.ib.req_id+=1
 
 ############### 2. Fundamental Data Section ###############
+    def req_fundamental_data(self,symbol):
+        '''
+        
+        '''
+        
+        # create contract
+        contract = self.security(symbol)
 
-
-
+        # requesting fundamental data
+        self.ib.reqFundamentalData(reqId=self.ib.req_id,
+                                   contract = contract,
+                                   reportType = "ReportsFinStatements",
+                                   fundamentalDataOptions=[])
+        print(1)
+        time.sleep(5)
+        self.ib.req_id+=1
 
 
 

@@ -1,5 +1,5 @@
 from ibapi.client import *
-from ibapi.common import SetOfFloat, SetOfString
+from ibapi.common import SetOfFloat, SetOfString, TickerId
 from ibapi.wrapper import *
 from ibapi.contract import Contract, ContractDetails
 import time
@@ -71,7 +71,6 @@ df = pd.DataFrame(dict_list)
 
    # return of stock price historical data
     def historicalData(self, reqId, bar):
-        
         # store item in self.stock_data_dict
         # if reqId not in self.stock_data_dict:
         if "stock_data" not in self.stock_data_dict[reqId]:
@@ -150,3 +149,9 @@ df = pd.DataFrame(dict_list)
         print("Delta for", symbol, expiry, strike, right, ":", delta)
         print("Gamma for", symbol, expiry, strike, right, ":", gamma)
         print("Theta for", symbol, expiry, strike, right, ":", theta)
+
+    def fundamentalData(self, reqId: int, data: str):
+        print(reqId, data)
+        print(2)
+        return super().fundamentalData(reqId, data)
+    
