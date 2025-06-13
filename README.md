@@ -7,7 +7,5 @@ solely rely on ibapi for following utilities:
 1. to parse data and ready for data analytics and so on
 2. implement algo trading or other usages.
 
-Directories:
-testingScripts  - random testing testingScripts
-ibkr_main       - will be workable api codes
-notes.txt       - sources usages
+Currently, I’m managing this project solo. My goal is to have more team members and transition the repository to a nonprofit, where volunteers can sustain it. I want to avoid a scenario like ib_insync, where the owner’s passing led to an unmaintained repo.
+
