@@ -1,3 +1,4 @@
+# Section 1 ibapi
 from ibapi.client import *
 from ibapi.common import SetOfFloat, SetOfString, TickerId
 from ibapi.wrapper import *
@@ -44,11 +45,53 @@ df = pd.DataFrame(dict_list)
         
         self.stock_fundamental_data = {}
 
+        
+        self.portfolio_data = {}
+        self.portfolio_update_complete = False
+
     # output error
     def error(self,reqId,errorCode,errorString,test=""):
         print("Error {} {} {}".format(reqId,errorCode,errorString))
         # time.sleep(7)
         # self.disconnect()
+
+    # Request portfolio
+    def updatePortfolio(self, contract: Contract, position: float, marketPrice: float, marketValue: float,
+                        averageCost: float, unrealizedPNL: float, realizedPNL: float, accountName: str):
+        """Callback for portfolio updates."""
+        symbol = contract.symbol
+        sec_type = contract.secType
+        expiry = contract.lastTradeDateOrContractMonth if contract.lastTradeDateOrContractMonth else ""
+        strike = contract.strike if contract.strike else 0.0
+        right = contract.right if contract.right else ""
+
+        # Store portfolio data
+        self.portfolio_data[symbol] = {
+            "symbol": symbol,
+            "sec_type": sec_type,
+            "expiry": expiry,
+            "strike": strike,
+            "right": right,
+            "position": position,
+            "market_price": marketPrice,
+            "market_value": marketValue,
+            "average_cost": averageCost,
+            "unrealized_pnl": unrealizedPNL,
+            "realized_pnl": realizedPNL,
+            "account_name": accountName
+        }
+        print(f"Portfolio Update: {symbol}, Position: {position}, Market Price: {marketPrice}")
+
+    def accountDownloadEnd(self, accountName: str):
+        """Callback to indicate portfolio update is complete."""
+        self.portfolio_update_complete = True
+        print(f"Portfolio download complete for account: {accountName}")
+
+    def position(self, account: str, contract: Contract, position: float, avgCost: float):
+        """Callback for position details (optional)."""
+        symbol = contract.symbol
+        print(f"Position: {symbol}, Account: {account}, Position: {position}, Avg Cost: {avgCost}")
+        # Optionally store position data if needed
 
 
 

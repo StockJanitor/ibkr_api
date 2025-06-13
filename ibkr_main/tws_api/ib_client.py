@@ -1,3 +1,5 @@
+# Section 2 wrapper
+
 from ib_io import ib_io
 from threading import Thread
 import time
@@ -10,6 +12,12 @@ from ibapi.contract import Contract
 class ib_client:
     def __init__(self,clientId = 1,port=7497,host="127.0.0.1") -> None:
         """
+        Intput:
+        port: 
+        7496 - live 
+        7497 - paper
+
+
         3 secions:
         1. mkt data section
         2. fundmental data section
@@ -21,8 +29,8 @@ class ib_client:
         self.ib.connect(host,port,clientId)
 
         # establish on a thread
-        ib_thread = Thread(target = self.run_loop,daemon=True)
-        ib_thread.start()
+        self.ib_thread = Thread(target = self.run_loop,daemon=True)
+        self.ib_thread.start()
         time.sleep(2)
         
         # contract data dict default - STK USD ISLAND
@@ -46,6 +54,43 @@ class ib_client:
     def process_data(self, data):
         for key, value in data.items():
             self.contract_data[key] = value
+
+
+############### 0. Portfolio Data Section ###############
+
+    def req_portfolio(self):
+        """
+        Request portfolio data and return as a DataFrame.
+        Output: pandas DataFrame containing portfolio data.
+        """
+        # Reset portfolio data and completion flag
+        self.ib.portfolio_data = {}
+        self.ib.portfolio_update_complete = False
+
+        # Request account updates (True to subscribe, False to unsubscribe after)
+        self.ib.reqAccountUpdates(True, "")  # Empty string for default account
+
+        # Wait for portfolio data to be fully updated
+        timeout = 10  # seconds
+        start_time = time.time()
+        while not self.ib.portfolio_update_complete and (time.time() - start_time) < timeout:
+            time.sleep(0.5)
+
+        # Unsubscribe from further updates
+        self.ib.reqAccountUpdates(False, "")
+
+        # Process portfolio data into a DataFrame
+        if not self.ib.portfolio_data:
+            print("No portfolio data received.")
+            return
+            # return pd.DataFrame()
+
+        # Convert portfolio data to list of dictionaries
+        portfolio_list = [data for data in self.ib.portfolio_data.values()]
+
+        # Create DataFrame
+        # df = pd.DataFrame(portfolio_list)
+        return portfolio_list
 
 ############### 1. Market Data Section ###############
     # function - creating security(contract)
