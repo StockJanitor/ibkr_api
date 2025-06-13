@@ -1,4 +1,11 @@
 # Section 3 execution
+import sys
+import os
+
+# Add the 'lib' directory to sys.path
+current_dir = os.getcwd()
+lib_path = os.path.abspath(os.path.join(current_dir, '..', 'lib'))
+sys.path.append(lib_path)
 
 from ib_client import ib_client
 import time
