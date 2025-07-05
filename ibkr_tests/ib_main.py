@@ -4,8 +4,9 @@ import os
 
 # Add the 'lib' directory to sys.path
 current_dir = os.getcwd()
-lib_path = os.path.abspath(os.path.join(current_dir, '..', 'lib'))
+lib_path = os.path.abspath(os.path.join(current_dir,"ibkr_api", 'ibkr_lib'))
 sys.path.append(lib_path)
+print(lib_path)
 
 from ib_client import ib_client
 import time
@@ -25,17 +26,19 @@ ite1 = {
 tickers = "AAPL"
 ############### Program Codes ###############
 # initialize client object
-item = ib_client()
+item = ib_client(port=7496)
+
+##### ---------- Req Portfolio ---------- #####
 
 
-##### STOCKS #####
+##### ---------- STOCKS ---------- #####
 
 # request historical price
 # Example: data_details = {"duration" : "1 M", "candle_size" : "1 day"... security details}
-data = {"duration": "5 D"}
-item.req_stock_historical_data(tickers, data_detail=data)
+# data = {"duration": "5 D"}
+# item.req_stock_historical_data(tickers, data_detail=data)
 
-print(item.ib.stock_data_dict)
+# print(item.ib.stock_data_dict)
 # item.toJson(item.ib.stock_data_dict)
 
 
@@ -47,7 +50,7 @@ print(item.ib.stock_data_dict)
 
 
 
-##### OPTIONS #####
+##### ---------- OPTIONS ---------- #####
 
 # # obtain full option chain
 # item.req_option_chain(tickers)

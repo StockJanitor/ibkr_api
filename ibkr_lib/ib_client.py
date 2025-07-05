@@ -298,18 +298,30 @@ class ib_client:
         return self.ib.filtered_option_chain
 
 
+    # def toJson(self, item:dict):
+    #     import json
+    #     import os
+    #     # Get current working directory
+    #     current_directory = os.path.dirname(os.path.abspath(__file__))
+
+    #     for _ in item:
+    #         for v in item[_]["stock_data"]:
+    #             v["volume"] = float(v['volume'])
+    #         with open(f"{current_directory}/data/{item[_]["ticker"]}.json", "w") as outfile: 
+    #             json.dump(item, outfile,indent=4)
+
     def toJson(self, item:dict):
-        import json
-        import os
-        # Get current working directory
-        current_directory = os.path.dirname(os.path.abspath(__file__))
+            import json
+            import os
+            # Get current working directory
+            current_directory = os.path.dirname(os.path.abspath(__file__))
 
-        for _ in item:
-            for v in item[_]["stock_data"]:
-                v["volume"] = float(v['volume'])
-            with open(f"{current_directory}/data/{item[_]["ticker"]}.json", "w") as outfile: 
-                json.dump(item, outfile,indent=4)
-
+            for _ in item:
+                for v in item[_]["stock_data"]:
+                    v["volume"] = float(v['volume'])
+                ticker = item[_]["ticker"]
+                with open(f"{current_directory}/data/{ticker}.json", "w") as outfile: 
+                    json.dump(item, outfile, indent=4)
 
 
 
